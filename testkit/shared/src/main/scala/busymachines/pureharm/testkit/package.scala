@@ -29,17 +29,12 @@ package object testkit {
 
   @implicitNotFound(
     msg = """
-      |TestLogger is implemented by default in either:
+      |TestLogger should be available once you implement the abstract member in either:
       |  - busymachines.pureharm.testkit.FixturePureharmTest
       |  - busymachines.pureharm.testkit.PureharmTest
-      | 
-      |Depending on which one you use. And there is little reason to want
-      |it from somewhere else. But you can always override it to plug
-      |in a custom one.
       |
       |The purpose of TestLogger is to log everything related to test-setup/
       |tear-down to enrich whatever scalatest tells you
-      |
       |"""
   )
   type TestLogger = TestLogger.Type
