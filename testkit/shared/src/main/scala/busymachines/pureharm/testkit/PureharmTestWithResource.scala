@@ -23,7 +23,6 @@ import busymachines.pureharm.testkit.util._
 import org.scalactic.source
 import org.scalatest._
 import org.scalatest.funsuite.FixtureAnyFunSuite
-import scala.concurrent.duration.FiniteDuration
 
 /** This is an experimental base class,
   * at some point it should be moved to a testkit module
