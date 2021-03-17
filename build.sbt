@@ -128,9 +128,6 @@ lazy val testkitJVM = testkit.jvm.settings(
 //=============================================================================
 
 lazy val commonSettings = Seq(
-  //required for munit: https://scalameta.org/munit/docs/getting-started.html
-  testFrameworks += new TestFramework("munit.Framework"),
-
   Compile / unmanagedSourceDirectories ++= {
     val major = if (isDotty.value) "-3" else "-2"
     List(CrossType.Pure, CrossType.Full).flatMap(
