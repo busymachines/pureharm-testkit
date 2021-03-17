@@ -96,7 +96,7 @@ lazy val root = project
   .in(file("."))
   .aggregate(
     testkitJVM,
-    // testkitJS,
+    //testkitJS,
   )
   .enablePlugins(NoPublishPlugin)
   .enablePlugins(SonatypeCiReleasePlugin)
@@ -113,7 +113,7 @@ lazy val testkit = crossProject(JVMPlatform)
       "com.busymachines" %%% "pureharm-effects-cats" % pureharmEffectsV withSources(),
       "org.typelevel" %%% "log4cats-core" % log4catsV withSources(),
       
-     "org.scalatest" %%% "scalatest" % scalatestV  withSources(),
+     "org.scalatest" %%% "scalatest-funsuite" % scalatestV  withSources(),
     ),
   )
 
@@ -121,7 +121,8 @@ lazy val testkitJVM = testkit.jvm.settings(
   javaOptions ++= Seq("-source", "1.8", "-target", "1.8")
 )
 
-// lazy val testkitJS = testkit.js
+//scalatest 3.2.6 not published yet for scalajs 3.0.0-RC1
+//lazy val testkitJS = testkit.js
 
 //=============================================================================
 //================================= Settings ==================================
