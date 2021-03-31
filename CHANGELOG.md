@@ -7,11 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # unreleased
 
-:warning: Breaking changes :warning:
+### :warning: Breaking changes :warning:
 
 - replace scalatest w/ [munit-cats-effect](https://github.com/typelevel/munit-cats-effect) `1.0.1`. Do not forget to add `testFrameworks += new TestFramework("munit.Framework")` to your build, as per [usage instructions](https://scalameta.org/munit/docs/getting-started.html)
 
-Add
+### Deprecations
+
+- `PureharmTestWithResource`. You can just use the `munit` style within the `PureharmTest`. Simply do:
+
+```scala
+import busymachines.pureharm.testkit._
+
+final class MyTest extends PureharmTest {
+  private val myResource =
+    ResourceFixture((to: TestOptions) => Resource.liftF(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
+
+  myResource.test("with resource")((_: Unit) => testLogger.info("Executing test w/ resource"))
+}
+```
+
+### New Scala versions:
+
+- 3.0.0-RC1 for ScalaJS
 
 # 0.1.0
 

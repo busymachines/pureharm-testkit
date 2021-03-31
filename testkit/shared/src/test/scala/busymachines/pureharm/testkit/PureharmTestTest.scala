@@ -23,14 +23,14 @@ import scala.concurrent.duration._
 final class PureharmTestTest extends PureharmTest {
   implicit override val testLogger: TestLogger = TestLogger(PrintlnLogger)
 
-  val resource =
-    ResourceFixture((to: TestOptions) => Resource.liftF(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
-
   test("simple test") {
     testLogger.info("Executing first test!")
   }
 
-  resource.test("with resource") { (_: Unit) => testLogger.info("Executing test w/ resource") }
+  private val myResource =
+    ResourceFixture((to: TestOptions) => Resource.liftF(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
+
+  myResource.test("with resource")((_: Unit) => testLogger.info("Executing test w/ resource"))
 
   // test("throw exception in body") {
   //   throw new RuntimeException("Comment me after running once")
