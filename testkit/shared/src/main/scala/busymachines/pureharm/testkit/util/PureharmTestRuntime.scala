@@ -21,16 +21,13 @@ import busymachines.pureharm.effects.pools._
 
 /** Usually overriding the "executionContext" should be enough
   */
-trait PureharmTestRuntime {
-
-  private lazy val defaultExecutionContext: ExecutionContextCT = UnsafePools.cached("phtest-ec")
-  private lazy val defaultFT:               ExecutionContextFT = UnsafePools.fixed("phtest-ft", 8)
+trait PureharmTestRuntime extends PureharmTestPlatformSpecific {
 
   private lazy val defaultContextShift: ContextShift[IO] = IO.contextShift(executionContextCT)
   private lazy val defaultTimer:        Timer[IO]        = IO.timer(executionContextCT)
 
   private lazy val defaultBlockingShifter: BlockingShifter[IO] =
-    BlockingShifter.fromExecutionContext(UnsafePools.cached("phtest-blocker"))
+    BlockingShifter.fromExecutionContext(defaultExecutionContext)
 
   def executionContextFT:          ExecutionContextFT  = defaultFT
   implicit def executionContextCT: ExecutionContextCT  = defaultExecutionContext

@@ -32,7 +32,7 @@ val Scala3RC1 = "3.0.0-RC1"
 //see: https://github.com/xerial/sbt-sonatype#buildsbt
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 
-ThisBuild / baseVersion  := "0.1.0"
+ThisBuild / baseVersion  := "0.2"
 ThisBuild / organization := "com.busymachines"
 ThisBuild / organizationName := "BusyMachines"
 ThisBuild / homepage     := Option(url("https://github.com/busymachines/pureharm-testkit"))
@@ -84,10 +84,12 @@ ThisBuild / versionIntroduced := Map(
 ThisBuild / resolvers += Resolver.sonatypeRepo("releases")
 ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 
-val pureharmCoreV    = "0.1.0" //https://github.com/busymachines/pureharm-core/releases
-val pureharmEffectsV = "0.1.0" //https://github.com/busymachines/pureharm-effects-cats/releases
-val scalatestV       = "3.2.6" //https://github.com/scalatest/scalatest/releases
-val log4catsV        = "1.2.0" //https://github.com/typelevel/log4cats/releases
+// format: off
+val pureharmCoreV        = "0.1.0"     //https://github.com/busymachines/pureharm-core/releases
+val pureharmEffectsV     = "0.1.0"     //https://github.com/typelevel/cats-effect/releases
+val munitV               = "0.7.23"    //https://github.com/scalameta/munit/releases
+val log4catsV            = "1.2.0"     //https://github.com/typelevel/log4cats/releases
+// format: on
 //=============================================================================
 //============================== Project details ==============================
 //=============================================================================
@@ -96,24 +98,24 @@ lazy val root = project
   .in(file("."))
   .aggregate(
     testkitJVM,
-    //testkitJS,
+    testkitJS,
   )
   .enablePlugins(NoPublishPlugin)
   .enablePlugins(SonatypeCiReleasePlugin)
   .settings(commonSettings)
 
-lazy val testkit = crossProject(JVMPlatform)
+lazy val testkit = crossProject(JVMPlatform, JSPlatform)
   .settings(commonSettings)
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .settings(
     name := "pureharm-testkit",
     libraryDependencies ++= Seq(  
-      "com.busymachines" %%% "pureharm-core-anomaly" % pureharmCoreV withSources(),
-      "com.busymachines" %%% "pureharm-core-sprout" % pureharmCoreV withSources(),
-      "com.busymachines" %%% "pureharm-effects-cats" % pureharmEffectsV withSources(),
-      "org.typelevel" %%% "log4cats-core" % log4catsV withSources(),
-      
-     "org.scalatest" %%% "scalatest-funsuite" % scalatestV  withSources(),
+      // format: off
+      "com.busymachines" %%% "pureharm-core-anomaly"   % pureharmCoreV      withSources(),
+      "com.busymachines" %%% "pureharm-core-sprout"    % pureharmCoreV      withSources(),
+      "com.busymachines" %%% "pureharm-effects-cats"   % pureharmEffectsV   withSources(),
+      "org.typelevel"    %%% "log4cats-core"           % log4catsV          withSources(),
+      "org.scalameta"    %%% "munit"                   % munitV             withSources(),
+      // format: on
     ),
   )
 
@@ -121,14 +123,21 @@ lazy val testkitJVM = testkit.jvm.settings(
   javaOptions ++= Seq("-source", "1.8", "-target", "1.8")
 )
 
-//scalatest 3.2.6 not published yet for scalajs 3.0.0-RC1
-//lazy val testkitJS = testkit.js
+lazy val testkitJS = testkit
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
+  .jsSettings(
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  )
+  .js
 
 //=============================================================================
 //================================= Settings ==================================
 //=============================================================================
 
 lazy val commonSettings = Seq(
+  //required for munit: https://scalameta.org/munit/docs/getting-started.html
+  testFrameworks += new TestFramework("munit.Framework"),
+
   Compile / unmanagedSourceDirectories ++= {
     val major = if (isDotty.value) "-3" else "-2"
     List(CrossType.Pure, CrossType.Full).flatMap(

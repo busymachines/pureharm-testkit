@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm
+package busymachines.pureharm.testkit.util
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 26 Jun 2020
-  */
-package object testkit extends PureharmTestkitAliases
+sealed trait TestOutcome extends Product with Serializable {
+  override def toString: String = this.productPrefix
+}
+
+object TestOutcome {
+  case object Failed      extends TestOutcome
+  case object Succeeded   extends TestOutcome
+  case object InitError   extends TestOutcome
+}

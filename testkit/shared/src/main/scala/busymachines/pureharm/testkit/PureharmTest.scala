@@ -16,24 +16,22 @@
 
 package busymachines.pureharm.testkit
 
-import java.util.concurrent.TimeUnit
-
 import busymachines.pureharm.effects._
+import busymachines.pureharm.effects.implicits._
 import busymachines.pureharm.testkit.util._
-import org.scalactic.source
-import org.scalatest._
-import org.scalatest.exceptions._
-import org.scalatest.funsuite.AnyFunSuite
+import munit.FunSuite
+import scala.concurrent.duration._
 
-/** This is an experimental base class,
-  * at some point it should be moved to a testkit module
+/** Base class that is recommended to be extended in a "testkit" module
+  * in your own application, and added the corresponding flavor.
+  *
+  * All tests are in IO[Unit], and no special syntax is offered to
+  * return any other types of values.
   *
   * @author Lorand Szakacs, https://github.com/lorandszakacs
   * @since 24 Jun 2020
   */
-abstract class PureharmTest
-  extends AnyFunSuite with PureharmAssertions with Assertions with PureharmTestRuntimeLazyConversions {
-  final type MetaData = TestData
+abstract class PureharmTest extends FunSuite with PureharmAssertions with PureharmTestRuntimeLazyConversions {
 
   implicit def testLogger: TestLogger
 
@@ -42,43 +40,150 @@ abstract class PureharmTest
     */
   implicit def runtime: PureharmTestRuntime = PureharmTestRuntime
 
-  import busymachines.pureharm.effects.implicits._
+  override def munitTimeout: Duration = 60.seconds
 
-  protected def test(
-    testName: String,
-    testTags: Tag*
-  )(
-    testFun:  IO[Assertion]
-  )(implicit
-    position: source.Position
-  ): Unit = {
+  final override def test(name: String)(body: => Any)(implicit loc: Location): Unit = {
+    this.test(new TestOptions(name))(body)
+  }
 
-    val mdc = MDCKeys(testName, position)
-    val iotest: IO[Assertion] = for {
-      _ <- testLogger.info(mdc)(s"STARTING")
-      t <- testFun.timedAttempt(TimeUnit.MILLISECONDS)
-      (d, att) = t
-      ass <- att match {
-        case Left(e: TestPendingException) =>
-          testLogger.info(mdc.++(MDCKeys(Pending, d)))("FINISHED") *> IO.raiseError[Assertion](e)
+  final override def test(options: TestOptions)(body: => Any)(implicit loc: Location): Unit = {
+    val io: IO[Unit] = testIO(options)(body)
+    super.test(options)(io)
+  }
 
-        case Left(e: TestFailedException) =>
-          testLogger.info(mdc.++(MDCKeys(Exceptional(e), d)))("FINISHED") *> IO.raiseError[Assertion](e)
+  override def munitValueTransforms: List[ValueTransform] =
+    super.munitValueTransforms ++ List(pureharmMunitIOTransform)
 
-        case Left(e: TestCanceledException) =>
-          testLogger.info(mdc.++(MDCKeys(Exceptional(e), d)))("FINISHED") *> IO.raiseError[Assertion](e)
+  private val pureharmMunitIOTransform: ValueTransform =
+    new ValueTransform(
+      "IO",
+      { case e: IO[_] => e.unsafeToFuture() },
+    )
 
-        case Left(e) =>
-          testLogger.warn(mdc.++(MDCKeys(Exceptional(e), d)))(
-            "TERMINATED — fail tests with assertions, not by throwing random"
-          ) *> IO.raiseError[Assertion](e)
-
-        case Right(ass) =>
-          testLogger.info(mdc.++(MDCKeys(Succeeded, d)))("FINISHED") *> IO.pure[Assertion](ass)
-
+  /** This method ensures that all tests are properly defined in IO, and no willy nilly exceptions
+    * are thrown,
+    */
+  private def testIO(options: TestOptions)(body: => Any): IO[Unit] = {
+    val test = IO
+      .delay(body)
+      .adaptError { case e =>
+        TestInitCatastrophe(
+          s"""|-
+              |Test body threw exception.
+              |
+              |location:
+              |  ${options.location}
+              |
+              |exception:
+              |${e.toString}
+              |
+              |---
+              |Please write a pure test in IO that does not throw exceptions.
+              |-
+              |-
+              |""".stripMargin,
+          options,
+          Option(e),
+        )
       }
-    } yield ass
+      .flatMap {
+        case value:             IO[_]                       => value.void
+        case syncIOValue:       SyncIO[_]                   => syncIOValue.toIO.void
+        //this happens when we use the resource fixture, FunFixture.async, delegates to the
+        //overriden methods defined here.
+        case fixtureTestResult: scala.concurrent.Promise[_] =>
+          IO.fromFuture(IO(fixtureTestResult.future)).void
+        case any:               Any                         =>
+          IO.raiseError[Unit](
+            TestInitCatastrophe(
+              s"""|-
+                  |Unsupported return type ${any.getClass.getName()}.
+                  |
+                  |location:
+                  |  ${options.location}
+                  |
+                  |Please just write a test in IO[Unit].
+                  |
+                  |-
+                  |""".stripMargin,
+              options,
+            )
+          )
+      }
 
-    super.test(testName, testTags: _*)(iotest.unsafeRunSync())
+    for {
+      _    <- testLogger.info(MDCKeys.testExec(options))("starting test")
+      tatt <- test.timedAttempt()
+      (duration, attempt) = tatt
+      _ <- attempt match {
+        case Left(e)  =>
+          testLogger.error(MDCKeys.testExec(options, TestOutcome.Failed, duration))(
+            s"failed test. Reason:\n ${e.toString()}"
+          )
+        case Right(_) =>
+          testLogger.info(MDCKeys.testExec(options, TestOutcome.Succeeded, duration))(s"successful test")
+      }
+      _ <- attempt.liftTo[IO]
+    } yield ()
+  }
+
+  /**
+    */
+  object ResourceFixture {
+
+    import scala.concurrent.Promise
+
+    def apply[T](
+      resource: TestOptions => Resource[IO, T]
+    ): SyncIO[FunFixture[T]] = SyncIO[FunFixture[T]] {
+      //this promise holds the resource cleanup IO
+      val promise = Promise[IO[Unit]]()
+
+      FunFixture.async(
+        setup    = { testOptions =>
+          val setupIO: IO[T] =
+            for {
+              allocated <- resource(testOptions).allocated.timedAttempt().flatMap { case (duration, att) =>
+                att match {
+                  case Left(e)  =>
+                    testLogger.error(MDCKeys.testSetup(testOptions, TestOutcome.InitError, duration))("init: failed") >>
+                      TestInitCatastrophe(
+                        s"Failed to acquire resource for testName=${testOptions.name}. Reason:\n${e.toString}",
+                        testOptions,
+                        Option(e),
+                      ).raiseError[IO, (T, IO[Unit])]
+                  case Right(v) =>
+                    testLogger
+                      .info(MDCKeys.testSetup(testOptions, duration))("init: success")
+                      .as(v: (T, IO[Unit]))
+                }
+              }
+              (resourceFixture, release) = allocated
+              _         <- IO(promise.success(release))
+            } yield resourceFixture: T
+
+          setupIO.unsafeToFuture()
+        },
+        teardown = { (_: T) => IO.fromFuture(IO(promise.future)).flatten.unsafeToFuture() },
+      )
+    }
+  }
+
+  implicit class PureharmSyncIOOps[T](private val fixture: SyncIO[FunFixture[T]]) {
+
+    def test(name:  String)(
+      body:         T => IO[Unit]
+    )(implicit loc: Location): Unit = {
+      val options = TestOptions(name)
+      runFixture().test(options)(body)
+    }
+
+    def test(options: TestOptions)(
+      body:           T => IO[Unit]
+    )(implicit loc:   Location): Unit = {
+      runFixture().test(options)(body)
+    }
+
+    private def runFixture(): FunFixture[T] = fixture.unsafeRunSync()
   }
 }

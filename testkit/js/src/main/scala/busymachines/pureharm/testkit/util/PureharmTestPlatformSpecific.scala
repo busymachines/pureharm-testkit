@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm
+package busymachines.pureharm.testkit.util
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 26 Jun 2020
-  */
-package object testkit extends PureharmTestkitAliases
+import busymachines.pureharm.effects._
+import busymachines.pureharm.effects.pools._
+
+trait PureharmTestPlatformSpecific {
+  protected def defaultExecutionContext: ExecutionContextCT = ExecutionContextCT(ExecutionContext.global)
+  protected def defaultFT:               ExecutionContextFT = ExecutionContextFT(ExecutionContext.global)
+}
