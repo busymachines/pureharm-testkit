@@ -30,7 +30,7 @@ final class PureharmTestTest extends PureharmTest {
     testLogger.info("Executing first test!")
   }
 
-  resource.test("with resource") { _: Unit => testLogger.info("Executing test w/ resource") }
+  resource.test("with resource") { (_: Unit) => testLogger.info("Executing test w/ resource") }
 
   // test("throw exception in body") {
   //   throw new RuntimeException("Comment me after running once")

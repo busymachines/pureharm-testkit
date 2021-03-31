@@ -70,7 +70,7 @@ ThisBuild / spiewakMainBranches       := List("main")
 ThisBuild / Test / publishArtifact    := false
 
 ThisBuild / scalaVersion       := Scala213
-ThisBuild / crossScalaVersions := List(Scala213)
+ThisBuild / crossScalaVersions := List(Scala213, Scala3RC1)
 
 //required for binary compat checks
 ThisBuild / versionIntroduced := Map(
@@ -98,7 +98,7 @@ lazy val root = project
   .in(file("."))
   .aggregate(
     testkitJVM,
-    //testkitJS,
+    testkitJS,
   )
   .enablePlugins(NoPublishPlugin)
   .enablePlugins(SonatypeCiReleasePlugin)
@@ -106,10 +106,6 @@ lazy val root = project
 
 lazy val testkit = crossProject(JVMPlatform, JSPlatform)
   .settings(commonSettings)
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
-  .jsSettings(
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
-  )
   .settings(
     name := "pureharm-testkit",
     libraryDependencies ++= Seq(  
@@ -127,8 +123,12 @@ lazy val testkitJVM = testkit.jvm.settings(
   javaOptions ++= Seq("-source", "1.8", "-target", "1.8")
 )
 
-//scalatest 3.2.6 not published yet for scalajs 3.0.0-RC1
-//lazy val testkitJS = testkit.js
+lazy val testkitJS = testkit
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
+  .jsSettings(
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  )
+  .js
 
 //=============================================================================
 //================================= Settings ==================================
