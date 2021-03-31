@@ -16,72 +16,32 @@
 
 package busymachines.pureharm.testkit
 
-import java.util.concurrent.TimeUnit
+import cats.effect._
 
-import busymachines.pureharm.effects._
-import busymachines.pureharm.testkit.util._
-import org.scalactic.source
-import org.scalatest._
-import org.scalatest.funsuite.FixtureAnyFunSuite
-
-/** This is an experimental base class,
-  * at some point it should be moved to a testkit module
-  *
-  * @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 13 Jun 2019
-  */
-abstract class PureharmTestWithResource
-  extends FixtureAnyFunSuite with Assertions with PureharmAssertions with PureharmTestRuntimeLazyConversions {
-  final override type FixtureParam = ResourceType
-  final type MetaData              = TestData
-
-  /** @see PureharmTestRuntimeLazyConversions
-    *     for details as to why this is a def
-    */
-  implicit def runtime: PureharmTestRuntime = PureharmTestRuntime
-
-  implicit def testLogger: TestLogger
-
-  import busymachines.pureharm.effects.implicits._
+@scala.deprecated(
+  "Use PureharmTest directly with the 'val myResource = ResourceFixture(testOptions => ???: Resource[IO, T])' and then: 'myResource.test{res => testBody}' style instead",
+  "0.2.0",
+)
+abstract class PureharmTestWithResource extends PureharmTest {
+  final type MetaData = TestOptions
 
   type ResourceType
-  /** Instead of the "before and after shit" simply init, and close
+
+  /** Instead of the "before and after" stuff simply init, and close
     * everything in this Resource...
     *
     * @param meta
     *  Use this information to create table names or something
     */
-  def resource(meta: MetaData): Resource[IO, ResourceType]
+  def resource(testOptions: TestOptions): Resource[IO, ResourceType]
+
+  private val resourceV = ResourceFixture(testOptions => resource(testOptions))
 
   protected def test(
-    testName: String,
-    testTags: Tag*
+    testName: String
   )(
-    testFun:  ResourceType => IO[Assertion]
+    testFun:  ResourceType => IO[Unit]
   )(implicit
-    position: source.Position
-  ): Unit =
-    super.test(testName, testTags: _*)(fp => testFun(fp).unsafeRunSync())
-
-  final override protected def withFixture(test: OneArgTest): Outcome = {
-    val mdc: Map[String, String] = MDCKeys(test)
-
-    def ftest(fix: ResourceType): IO[Outcome] =
-      for {
-        _ <- testLogger.info(mdc)(s"INITIALIZED")
-        t <- IO.delay(test(fix)).timedAttempt(TimeUnit.MILLISECONDS)
-        (d, out) = t
-        outcome <- out.liftTo[IO]
-        _       <- testLogger.info(mdc.++(MDCKeys(outcome, d)))(s"FINISHED")
-      } yield outcome
-
-    val fout: IO[Outcome] = for {
-      _   <- testLogger.info(mdc)(s"ACQUIRING FIXTURE")
-      out <- resource(test)
-        .onError { case e => testLogger.warn(mdc, e)("INIT — FAILED").to[Resource[IO, *]] }
-        .use(ftest)
-    } yield out
-
-    fout.unsafeRunSync()
-  }
+    position: Location
+  ): Unit = resourceV.test(testName)(testFun)
 }

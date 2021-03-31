@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm
+package busymachines.pureharm.testkit.util
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 26 Jun 2020
-  */
-package object testkit extends PureharmTestkitAliases
+import busymachines.pureharm.anomaly._
+import munit.TestOptions
+
+final case class TestInitCatastrophe(
+  override val message:  String,
+  options:  TestOptions,
+  override val causedBy: Option[Throwable] = Option.empty,
+) extends Catastrophe(message, causedBy) {
+
+  override def parameters: Anomaly.Parameters = super.parameters ++ Anomaly.Parameters(
+    "location" -> options.location.toString,
+    "tags"     -> options.tags.toSeq.map(_.toString()),
+    "testName" -> options.name,
+  )
+}

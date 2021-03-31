@@ -17,9 +17,7 @@
 package busymachines.pureharm.testkit.util
 
 import scala.concurrent.duration.FiniteDuration
-
-import org.scalactic.source
-import org.scalatest._
+import busymachines.pureharm.testkit._
 
 /** Common keys used in MDC contexts for loggers... allows us to be somewhat consistent
   * through the entire app especially since in logs these get sorted, so we can prefix
@@ -29,31 +27,33 @@ import org.scalatest._
   * @since 24 Jun 2020
   */
 object MDCKeys {
-  protected val OutcomeK: String = "outcome"
-  protected val TestName: String = "testName"
-  protected val Duration: String = "duration"
-  protected val Line:     String = "line"
+  private val OutcomeK: String = "outcome"
+  private val TestName: String = "testName"
+  private val Duration: String = "duration"
+  private val Line:     String = "line"
+  private val What:     String = "what"
 
-  def lineNumber(i: Int):            (String, String) = Line     -> i.toString
-  def testName(s:   String):         (String, String) = TestName -> s"'$s'"
-  def duration(s:   FiniteDuration): (String, String) = Duration -> s.toString
-  def outcome(o:    Outcome):        (String, String) = OutcomeK -> o.productPrefix
+  private def lineNumber(i: Int):            (String, String) = Line     -> i.toString
+  private def testName(s:   String):         (String, String) = TestName -> s"'$s'"
+  private def duration(d:   FiniteDuration): (String, String) = Duration -> d.toString
+  private def outcome(o:    TestOutcome):    (String, String) = OutcomeK -> o.productPrefix
+  private def exec:  (String, String) = What -> "exec"
+  private def setup: (String, String) = What -> "setup"
 
-  def outcomeFailed:  (String, String) = OutcomeK -> Failed.toString
-  def outcomeSuccess: (String, String) = OutcomeK -> Succeeded.productPrefix
-  def outcomePending: (String, String) = OutcomeK -> Pending.productPrefix
+  private def neutral(test: TestOptions) = Map(MDCKeys.testName(test.name), MDCKeys.lineNumber(test.location.line))
 
-  def apply(test: TestData): Map[String, String] =
-    test.pos match {
-      case None      =>
-        Map(MDCKeys.testName(test.name))
-      case Some(pos) =>
-        this.apply(test.name, pos)
-    }
+  def testExec(test: TestOptions): Map[String, String] =
+    neutral(test).+(this.exec)
 
-  def apply(testName: String, position: source.Position): Map[String, String] =
-    Map(MDCKeys.testName(testName), MDCKeys.lineNumber(position.lineNumber))
+  def testExec(test: TestOptions, out: TestOutcome, duration: FiniteDuration): Map[String, String] =
+    this.testExec(test) ++ Map(MDCKeys.outcome(out), MDCKeys.duration(duration))
 
-  def apply(out: Outcome, duration: FiniteDuration): Map[String, String] =
-    Map(MDCKeys.outcome(out), MDCKeys.duration(duration))
+  def testSetup(test: TestOptions): Map[String, String] =
+    neutral(test).+(this.setup)
+
+  def testSetup(test: TestOptions, duration: FiniteDuration): Map[String, String] =
+    neutral(test).+(this.setup).+(this.duration(duration))
+
+  def testSetup(test: TestOptions, o: TestOutcome, duration: FiniteDuration): Map[String, String] =
+    neutral(test).+(this.setup).+(this.outcome(o)).+(this.duration(duration))
 }

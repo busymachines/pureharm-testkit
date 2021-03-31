@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm
+package busymachines.pureharm.testkit
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 26 Jun 2020
-  */
-package object testkit extends PureharmTestkitAliases
+trait PureharmTestkitAliases {
+  val Ignore: munit.Tag = munit.Ignore
+  val Only:   munit.Tag = munit.Only
+  val Flaky:  munit.Tag = munit.Flaky
+  val Fail:   munit.Tag = munit.Fail
+  val Slow:   munit.Tag = munit.Slow
+
+  type Location = munit.Location
+  val Location: munit.Location.type = munit.Location
+
+  type TestOptions = munit.TestOptions
+  val TestOptions: munit.TestOptions.type = munit.TestOptions
+
+  type TestLogger = types.TestLogger
+  val TestLogger: types.TestLogger.type = types.TestLogger
+}

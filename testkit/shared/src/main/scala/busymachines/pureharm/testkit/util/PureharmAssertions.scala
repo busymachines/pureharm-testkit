@@ -16,43 +16,53 @@
 
 package busymachines.pureharm.testkit.util
 
-import scala.reflect.ClassTag
-
 import busymachines.pureharm.effects._
 import busymachines.pureharm.effects.implicits._
-import org.scalactic.{source, Prettifier}
-import org.scalatest._
+import scala.reflect.ClassTag
+import munit._
 
 /** @author Lorand Szakacs, https://github.com/lorandszakacs
   * @since 24 Jun 2020
   */
-trait PureharmAssertions {
-  import org.scalatest.Assertions._
+trait PureharmAssertions { self: Assertions =>
 
-  def assertFailure[E <: Throwable](a: Attempt[_])(implicit ct: ClassTag[E], pos: source.Position): Assertion =
-    assertThrows(a.unsafeGet())
+  private def getOrThrow[A](a: Either[Throwable, A]): A = a.unsafeGet()
 
-  def interceptFailure[E <: Throwable](a: Attempt[_])(implicit ct: ClassTag[E], pos: source.Position): E =
-    intercept[E](a.unsafeGet())
+  @scala.deprecated("Use interceptFailure", "0.2.0")
+  def assertFailure[E <: Throwable](a: Attempt[_])(implicit ct: ClassTag[E], loc: Location): E =
+    interceptFailure[E](a)
 
-  def assertSuccess[T](a: Attempt[T])(expected: T)(implicit prettifier: Prettifier, pos: source.Position): Assertion =
+  def interceptFailure[E <: Throwable](a: Attempt[_])(implicit ct: ClassTag[E], loc: Location): E =
+    intercept[E](getOrThrow(a))
+
+  def interceptFailureMessage[E <: Throwable](
+    expectedExceptionMessage: String
+  )(
+    a:                        Attempt[_]
+  )(implicit ct:              ClassTag[E], loc: Location): E =
+    interceptMessage[E](expectedExceptionMessage)(getOrThrow(a))
+
+  def assertSuccess[T](a: Attempt[T])(expected: T)(implicit loc: Location): Unit =
     a match {
       case Left(e)       => fail(s"excepted Right($e) but was Left($e)")
-      case Right(actual) => assertResult(expected)(actual)
+      case Right(actual) => assertEquals(obtained = actual, expected = expected)
     }
 
-  def assertLeft[L](a: Either[L, _])(expected: L)(implicit prettifier: Prettifier, pos: source.Position): Assertion =
+  def assertLeft[L](a: Either[L, _])(expected: L)(implicit loc: Location): Unit =
     a match {
-      case Left(actual) => assertResult(expected)(actual)
+      case Left(actual) => assertEquals(obtained = actual, expected = expected)
       case Right(r)     => fail(s"expected Left($expected) but got: Right($r)")
     }
 
-  def assertRight[R](a: Either[_, R])(expected: R)(implicit prettifier: Prettifier, pos: source.Position): Assertion =
+  def assertRight[R](a: Either[_, R])(expected: R)(implicit loc: Location): Unit =
     a match {
       case Left(e)       => fail(s"excepted Right($e) but was Left($e)")
-      case Right(actual) => assertResult(expected)(actual)
+      case Right(actual) => assertEquals(obtained = actual, expected = expected)
     }
 
-  def assertSome[T](o: Option[T])(expected: T)(implicit prettifier: Prettifier, pos: source.Position): Assertion =
-    assert(o === Option(expected))
+  def assertSome[T](o: Option[T])(expected: T)(implicit loc: Location): Unit =
+    o match {
+      case None         => fail(s"Expected Some(...), but value was None")
+      case Some(actual) => assertEquals(obtained = actual, expected = expected)
+    }
 }
