@@ -20,7 +20,7 @@ import busymachines.pureharm.testkit._
 
 final class MyTest extends PureharmTest {
   private val myResource =
-    ResourceFixture((to: TestOptions) => Resource.liftF(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
+    ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
 
   myResource.test("with resource")((_: Unit) => testLogger.info("Executing test w/ resource"))
 }
@@ -29,6 +29,10 @@ final class MyTest extends PureharmTest {
 ### New Scala versions:
 
 - 3.0.0-RC1 for ScalaJS
+
+### Dependency upgrades:
+- [pureharm-core](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
+- [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.2.0`
 
 # 0.1.0
 
