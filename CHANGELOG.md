@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # unreleased
 
+# 0.2.0
+
 ### :warning: Breaking changes :warning:
 
 - replace scalatest w/ [munit](https://github.com/scalameta/munit/releases) `0.7.23`. Do not forget to add `testFrameworks += new TestFramework("munit.Framework")` to your build, as per [usage instructions](https://scalameta.org/munit/docs/getting-started.html)

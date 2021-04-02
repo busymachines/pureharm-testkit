@@ -31,7 +31,7 @@ object types {
       |  - busymachines.pureharm.testkit.PureharmTest
       |
       |The purpose of TestLogger is to log everything related to test-setup/
-      |tear-down to enrich whatever scalatest tells you
+      |tear-down to enrich whatever munit tells you
       |"""
   )
   type TestLogger = TestLogger.Type

@@ -10,7 +10,7 @@ See [changelog](./CHANGELOG.md).
 
 ## modules
 
-- `"com.busymachines" %% s"pureharm-testkit" % "0.1.0"`. Which has these as its main dependencies:
+- `"com.busymachines" %% s"pureharm-testkit" % "0.2.0"`. Which has these as its main dependencies:
   - [munit](https://github.com/scalameta/munit/releases) `0.7.23`
   - [log4cats-core](https://github.com/typelevel/log4cats/releases) `1.2.2`
   - [pureharm-core-anomaly](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
@@ -19,7 +19,13 @@ See [changelog](./CHANGELOG.md).
 
 ## usage
 
-Create your own "testkit" package. And use that everywhere.
+Follow the [munit](https://scalameta.org/munit/docs/getting-started.html) setup to add the appropriate test framework to your build.
+
+```scala
+testFrameworks += new TestFramework("munit.Framework")
+```
+
+Then, create your own "testkit" package. And use that everywhere.
 
 ```scala
 package myapp
@@ -32,6 +38,10 @@ package object test extends testkit.PureharmTestkitAliases
 
 package myapp.test
 
+/**
+ * Add any custom assertions, flavors, styles, opiniated decisions
+ * here, and continue using this.
+ */
 abstract class MyAppTest extends testkit.PureharmTestkit
 
 //-------- EOF --------
@@ -41,16 +51,16 @@ package myapp.somemodule
 import myapp.test._
 
 final class MyTest extends MyAppTest {
+  test("no resource")(IO.unit)
+
   private val myResource =
     ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
 
   myResource.test(TestOptions("with resource").tag(Slow))((_: Unit) => testLogger.info("Executing test w/ resource"))
-
-  test("no resource")(IO.unit)
 }
 ```
 
-Under construction. See [release notes](https://github.com/busymachines/pureharm-core/releases) and tests for examples.
+Still under construction. See [release notes](https://github.com/busymachines/pureharm-testkit/releases) and tests for examples.
 
 ## Copyright and License
 
