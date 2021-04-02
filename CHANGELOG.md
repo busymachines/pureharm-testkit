@@ -9,16 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :warning: Breaking changes :warning:
 
-- replace scalatest w/ [munit-cats-effect](https://github.com/typelevel/munit-cats-effect) `1.0.1`. Do not forget to add `testFrameworks += new TestFramework("munit.Framework")` to your build, as per [usage instructions](https://scalameta.org/munit/docs/getting-started.html)
+- replace scalatest w/ [munit](https://github.com/scalameta/munit/releases) `0.7.23`. Do not forget to add `testFrameworks += new TestFramework("munit.Framework")` to your build, as per [usage instructions](https://scalameta.org/munit/docs/getting-started.html)
 
 ### Deprecations
 
 - `PureharmTestWithResource`. You can just use the `munit` style within the `PureharmTest`. Simply do:
 
 ```scala
-import busymachines.pureharm.testkit._
-
-final class MyTest extends PureharmTest {
+final class AlternativeToTestWithResource extends busymachines.pureharm.testkit.PureharmTestkit {
   private val myResource =
     ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
 
@@ -28,11 +26,14 @@ final class MyTest extends PureharmTest {
 
 ### New Scala versions:
 
-- 3.0.0-RC1 for ScalaJS
+- 3.0.0-RC1 for JS platform
+- 3.0.0-RC2, for JVM, and JS platform
 
 ### Dependency upgrades:
+
 - [pureharm-core](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
 - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.2.0`
+- [log4cats-core](https://github.com/typelevel/log4cats/releases) `1.2.2`
 
 # 0.1.0
 
