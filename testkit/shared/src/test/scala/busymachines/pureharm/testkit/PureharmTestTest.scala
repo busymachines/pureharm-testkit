@@ -28,7 +28,7 @@ final class PureharmTestTest extends PureharmTest {
   }
 
   private val myResource =
-    ResourceFixture((to: TestOptions) => Resource.liftF(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
+    ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
 
   myResource.test("with resource")((_: Unit) => testLogger.info("Executing test w/ resource"))
 

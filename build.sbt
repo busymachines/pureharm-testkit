@@ -24,6 +24,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Scala213  = "2.13.5"
 val Scala3RC1 = "3.0.0-RC1"
+val Scala3RC2 = "3.0.0-RC2"
 
 //=============================================================================
 //============================ publishing details =============================
@@ -70,12 +71,13 @@ ThisBuild / spiewakMainBranches       := List("main")
 ThisBuild / Test / publishArtifact    := false
 
 ThisBuild / scalaVersion       := Scala213
-ThisBuild / crossScalaVersions := List(Scala213, Scala3RC1)
+ThisBuild / crossScalaVersions := List(Scala213, Scala3RC1, Scala3RC2)
 
 //required for binary compat checks
 ThisBuild / versionIntroduced := Map(
   Scala213  -> "0.1.0",
   Scala3RC1 -> "0.1.0",
+  Scala3RC2 -> "0.2.0"
 )
 
 //=============================================================================
@@ -85,10 +87,10 @@ ThisBuild / resolvers += Resolver.sonatypeRepo("releases")
 ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 
 // format: off
-val pureharmCoreV        = "0.1.0"     //https://github.com/busymachines/pureharm-core/releases
-val pureharmEffectsV     = "0.1.0"     //https://github.com/typelevel/cats-effect/releases
+val pureharmCoreV        = "0.2.0"     //https://github.com/busymachines/pureharm-core/releases
+val pureharmEffectsV     = "0.2.0"     //https://github.com/busymachines/pureharm-effects-cats/releases
 val munitV               = "0.7.23"    //https://github.com/scalameta/munit/releases
-val log4catsV            = "1.2.0"     //https://github.com/typelevel/log4cats/releases
+val log4catsV            = "1.2.2"     //https://github.com/typelevel/log4cats/releases
 // format: on
 //=============================================================================
 //============================== Project details ==============================
