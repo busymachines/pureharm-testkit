@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # unreleased
 
+# 0.3.0
+
+### Dependency upgrades
+
+- [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.4.0`
+
 # 0.2.0
 
 ### :warning: Breaking changes :warning:

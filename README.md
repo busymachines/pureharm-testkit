@@ -10,12 +10,12 @@ See [changelog](./CHANGELOG.md).
 
 ## modules
 
-- `"com.busymachines" %% s"pureharm-testkit" % "0.2.0"`. Which has these as its main dependencies:
+- `"com.busymachines" %% s"pureharm-testkit" % "0.3.0"`. Which has these as its main dependencies:
   - [munit](https://github.com/scalameta/munit/releases) `0.7.23`
   - [log4cats-core](https://github.com/typelevel/log4cats/releases) `1.2.2`
   - [pureharm-core-anomaly](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
   - [pureharm-core-sprout](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
-  - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.2.0`
+  - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.4.0`
 
 ## usage
 
