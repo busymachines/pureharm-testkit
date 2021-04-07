@@ -88,7 +88,7 @@ ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 
 // format: off
 val pureharmCoreV        = "0.2.0"     //https://github.com/busymachines/pureharm-core/releases
-val pureharmEffectsV     = "0.2.0"     //https://github.com/busymachines/pureharm-effects-cats/releases
+val pureharmEffectsV     = "0.4.0"     //https://github.com/busymachines/pureharm-effects-cats/releases
 val munitV               = "0.7.23"    //https://github.com/scalameta/munit/releases
 val log4catsV            = "1.2.2"     //https://github.com/typelevel/log4cats/releases
 // format: on
