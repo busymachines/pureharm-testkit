@@ -18,11 +18,9 @@
 //============================== build details ================================
 //=============================================================================
 
-addCommandAlias("github-gen", "githubWorkflowGenerate")
-addCommandAlias("github-check", "githubWorkflowCheck")
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-val Scala213  = "2.13.5"
+val Scala213  = "2.13.6"
 val Scala3RC1 = "3.0.0-RC1"
 val Scala3RC2 = "3.0.0-RC2"
 
@@ -33,10 +31,10 @@ val Scala3RC2 = "3.0.0-RC2"
 //see: https://github.com/xerial/sbt-sonatype#buildsbt
 ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 
-ThisBuild / baseVersion  := "0.3"
-ThisBuild / organization := "com.busymachines"
+ThisBuild / baseVersion      := "0.4"
+ThisBuild / organization     := "com.busymachines"
 ThisBuild / organizationName := "BusyMachines"
-ThisBuild / homepage     := Option(url("https://github.com/busymachines/pureharm-testkit"))
+ThisBuild / homepage         := Option(url("https://github.com/busymachines/pureharm-testkit"))
 
 ThisBuild / scmInfo := Option(
   ScmInfo(
@@ -45,8 +43,8 @@ ThisBuild / scmInfo := Option(
   )
 )
 
-/** I want my email. So I put this here. To reduce a few lines of code,
-  * the sbt-spiewak plugin generates this (except email) from these two settings:
+/** I want my email. So I put this here. To reduce a few lines of code, the sbt-spiewak plugin generates this (except
+  * email) from these two settings:
   * {{{
   * ThisBuild / publishFullName   := "Loránd Szakács"
   * ThisBuild / publishGithubUser := "lorandszakacs"
@@ -61,7 +59,7 @@ ThisBuild / developers := List(
   )
 )
 
-ThisBuild / startYear := Some(2019)
+ThisBuild / startYear  := Some(2019)
 ThisBuild / licenses   := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 //until we get to 1.0.0, we keep strictSemVer false
@@ -77,7 +75,7 @@ ThisBuild / crossScalaVersions := List(Scala213, Scala3RC1, Scala3RC2)
 ThisBuild / versionIntroduced := Map(
   Scala213  -> "0.1.0",
   Scala3RC1 -> "0.1.0",
-  Scala3RC2 -> "0.2.0"
+  Scala3RC2 -> "0.2.0",
 )
 
 //=============================================================================
@@ -104,10 +102,8 @@ lazy val root = project
   )
   .enablePlugins(NoPublishPlugin)
   .enablePlugins(SonatypeCiReleasePlugin)
-  .settings(commonSettings)
 
 lazy val testkit = crossProject(JVMPlatform, JSPlatform)
-  .settings(commonSettings)
   .settings(
     name := "pureharm-testkit",
     libraryDependencies ++= Seq(  
@@ -126,30 +122,8 @@ lazy val testkitJVM = testkit.jvm.settings(
 )
 
 lazy val testkitJS = testkit
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .jsSettings(
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
   )
   .js
 
-//=============================================================================
-//================================= Settings ==================================
-//=============================================================================
-
-lazy val commonSettings = Seq(
-  //required for munit: https://scalameta.org/munit/docs/getting-started.html
-  testFrameworks += new TestFramework("munit.Framework"),
-
-  Compile / unmanagedSourceDirectories ++= {
-    val major = if (isDotty.value) "-3" else "-2"
-    List(CrossType.Pure, CrossType.Full).flatMap(
-      _.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + major))
-    )
-  },
-  Test / unmanagedSourceDirectories ++= {
-    val major = if (isDotty.value) "-3" else "-2"
-    List(CrossType.Pure, CrossType.Full).flatMap(
-      _.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + major))
-    )
-  },
-)
