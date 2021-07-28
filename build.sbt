@@ -104,6 +104,7 @@ lazy val root = project
   .enablePlugins(SonatypeCiReleasePlugin)
 
 lazy val testkit = crossProject(JVMPlatform, JSPlatform)
+  .settings(commonSettings)
   .settings(
     name := "pureharm-testkit",
     libraryDependencies ++= Seq(  
@@ -127,3 +128,12 @@ lazy val testkitJS = testkit
   )
   .js
 
+//=============================================================================
+//================================= Settings ==================================
+//=============================================================================
+
+lazy val commonSettings = Seq(
+  scalacOptions ++= Seq(
+    "-Xsource:3"
+  )
+)
