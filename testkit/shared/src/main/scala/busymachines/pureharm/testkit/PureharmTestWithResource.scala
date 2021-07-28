@@ -27,11 +27,10 @@ abstract class PureharmTestWithResource extends PureharmTest {
 
   type ResourceType
 
-  /** Instead of the "before and after" stuff simply init, and close
-    * everything in this Resource...
+  /** Instead of the "before and after" stuff simply init, and close everything in this Resource...
     *
     * @param meta
-    *  Use this information to create table names or something
+    *   Use this information to create table names or something
     */
   def resource(testOptions: TestOptions): Resource[IO, ResourceType]
 

@@ -22,21 +22,22 @@ import busymachines.pureharm.testkit.util._
 import munit.FunSuite
 import scala.concurrent.duration._
 
-/** Base class that is recommended to be extended in a "testkit" module
-  * in your own application, and added the corresponding flavor.
+/** Base class that is recommended to be extended in a "testkit" module in your own application, and added the
+  * corresponding flavor.
   *
-  * All tests are in IO[Unit], and no special syntax is offered to
-  * return any other types of values.
+  * All tests are in IO[Unit], and no special syntax is offered to return any other types of values.
   *
-  * @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 24 Jun 2020
+  * @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 24
+  *   Jun 2020
   */
 abstract class PureharmTest extends FunSuite with PureharmAssertions with PureharmTestRuntimeLazyConversions {
 
   implicit def testLogger: TestLogger
 
-  /** @see PureharmTestRuntimeLazyConversions
-    *     for details as to why this is a def
+  /** @see
+    *   PureharmTestRuntimeLazyConversions for details as to why this is a def
     */
   implicit def runtime: PureharmTestRuntime = PureharmTestRuntime
 
@@ -60,8 +61,7 @@ abstract class PureharmTest extends FunSuite with PureharmAssertions with Pureha
       { case e: IO[_] => e.unsafeToFuture() },
     )
 
-  /** This method ensures that all tests are properly defined in IO, and no willy nilly exceptions
-    * are thrown,
+  /** This method ensures that all tests are properly defined in IO, and no willy nilly exceptions are thrown,
     */
   private def testIO(options: TestOptions)(body: => Any): IO[Unit] = {
     val test = IO
@@ -127,8 +127,7 @@ abstract class PureharmTest extends FunSuite with PureharmAssertions with Pureha
     } yield ()
   }
 
-  /**
-    */
+  /** */
   object ResourceFixture {
 
     import scala.concurrent.Promise

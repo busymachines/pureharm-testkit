@@ -16,7 +16,9 @@
 
 package busymachines.pureharm
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 26 Jun 2020
+/** @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 26
+  *   Jun 2020
   */
 package object testkit extends PureharmTestkitAliases

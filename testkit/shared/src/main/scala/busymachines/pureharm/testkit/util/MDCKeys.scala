@@ -19,12 +19,13 @@ package busymachines.pureharm.testkit.util
 import scala.concurrent.duration.FiniteDuration
 import busymachines.pureharm.testkit._
 
-/** Common keys used in MDC contexts for loggers... allows us to be somewhat consistent
-  * through the entire app especially since in logs these get sorted, so we can prefix
-  * them universally
+/** Common keys used in MDC contexts for loggers... allows us to be somewhat consistent through the entire app
+  * especially since in logs these get sorted, so we can prefix them universally
   *
-  * @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 24 Jun 2020
+  * @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 24
+  *   Jun 2020
   */
 object MDCKeys {
   private val OutcomeK: String = "outcome"

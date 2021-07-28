@@ -21,7 +21,7 @@ import munit.TestOptions
 
 final case class TestInitCatastrophe(
   override val message:  String,
-  options:  TestOptions,
+  options:               TestOptions,
   override val causedBy: Option[Throwable] = Option.empty,
 ) extends Catastrophe(message, causedBy) {
 

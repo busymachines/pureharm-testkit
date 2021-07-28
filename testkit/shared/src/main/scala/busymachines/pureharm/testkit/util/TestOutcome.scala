@@ -21,7 +21,7 @@ sealed trait TestOutcome extends Product with Serializable {
 }
 
 object TestOutcome {
-  case object Failed      extends TestOutcome
-  case object Succeeded   extends TestOutcome
-  case object InitError   extends TestOutcome
+  case object Failed    extends TestOutcome
+  case object Succeeded extends TestOutcome
+  case object InitError extends TestOutcome
 }

@@ -21,8 +21,10 @@ import busymachines.pureharm.effects.implicits._
 import scala.reflect.ClassTag
 import munit._
 
-/** @author Lorand Szakacs, https://github.com/lorandszakacs
-  * @since 24 Jun 2020
+/** @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 24
+  *   Jun 2020
   */
 trait PureharmAssertions { self: Assertions =>
 
