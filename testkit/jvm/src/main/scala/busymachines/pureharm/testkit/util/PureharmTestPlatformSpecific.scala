@@ -16,12 +16,4 @@
 
 package busymachines.pureharm.testkit.util
 
-import busymachines.pureharm.effects.pools._
-
-trait PureharmTestPlatformSpecific {
-  protected def defaultExecutionContext: ExecutionContextCT = _ecCT
-  protected def defaultFT:               ExecutionContextFT = _ecFT
-
-  private lazy val _ecCT = UnsafePools.cached("phtest-ec")
-  private lazy val _ecFT = UnsafePools.fixed("phtest-ft", 8)
-}
+trait PureharmTestPlatformSpecific {}

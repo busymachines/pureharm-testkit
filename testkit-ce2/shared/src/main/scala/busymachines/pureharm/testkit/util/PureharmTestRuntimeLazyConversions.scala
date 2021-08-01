@@ -17,7 +17,6 @@
 package busymachines.pureharm.testkit.util
 
 import busymachines.pureharm.effects._
-import cats.effect.unsafe.{IORuntime, HackToGetBlockingPool}
 
 /** Basically the problem is as such: 1) ideally, you probably want only one PureharmTestRuntime instantiated in your
   * entire test run to not waste resources and startup time... 2) and you want easy usage...
@@ -35,8 +34,9 @@ import cats.effect.unsafe.{IORuntime, HackToGetBlockingPool}
   *   Jun 2020
   */
 trait PureharmTestRuntimeLazyConversions {
-
-  implicit def blockingPoolExectionContext(implicit phtr: PureharmTestRuntime): ExecutionContext =
-    HackToGetBlockingPool.blockingPoolFromIORuntime(phtr.implicitIORuntime)
-  implicit def catsEffectIORuntime(implicit phtr: PureharmTestRuntime): IORuntime = phtr.implicitIORuntime
+  implicit def phrtToEC(implicit phtr: PureharmTestRuntime): ExecutionContext    = phtr.executionContextCT
+  implicit def phrtToCS(implicit phtr: PureharmTestRuntime): ContextShift[IO]    = phtr.contextShift
+  implicit def phrtToTM(implicit phtr: PureharmTestRuntime): Timer[IO]           = phtr.timer
+  implicit def phrtToBS(implicit phtr: PureharmTestRuntime): BlockingShifter[IO] = phtr.blockingShifter
+  implicit def phrtToBL(implicit phtr: PureharmTestRuntime): Blocker             = phtr.blocker
 }

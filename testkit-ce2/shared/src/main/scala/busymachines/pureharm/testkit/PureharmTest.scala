@@ -26,6 +26,11 @@ import scala.concurrent.duration._
   * corresponding flavor.
   *
   * All tests are in IO[Unit], and no special syntax is offered to return any other types of values.
+  *
+  * @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 24
+  *   Jun 2020
   */
 abstract class PureharmTest extends FunSuite with PureharmAssertions with PureharmTestRuntimeLazyConversions {
 
@@ -83,7 +88,7 @@ abstract class PureharmTest extends FunSuite with PureharmAssertions with Pureha
       }
       .flatMap {
         case value:             IO[_]                       => value.void
-        case syncIOValue:       SyncIO[_]                   => syncIOValue.void.to[IO]
+        case syncIOValue:       SyncIO[_]                   => syncIOValue.toIO.void
         //this happens when we use the resource fixture, FunFixture.async, delegates to the
         //overriden methods defined here.
         case fixtureTestResult: scala.concurrent.Promise[_] =>
@@ -108,7 +113,7 @@ abstract class PureharmTest extends FunSuite with PureharmAssertions with Pureha
 
     for {
       _    <- testLogger.info(MDCKeys.testExec(options))("starting test")
-      tatt <- test.attempt.timedIn()
+      tatt <- test.attempt.timedIn(MILLISECONDS)
       (duration, attempt) = tatt
       _ <- attempt match {
         case Left(e)  =>
@@ -151,20 +156,22 @@ abstract class PureharmTest extends FunSuite with PureharmAssertions with Pureha
         setup    = { testOptions =>
           val setupIO: IO[T] =
             for {
-              allocated <- resource(testOptions).allocated.attempt.timedIn().flatMap { case (duration, att) =>
-                att match {
-                  case Left(e)  =>
-                    testLogger.error(MDCKeys.testSetup(testOptions, TestOutcome.InitError, duration))("init: failed") >>
-                      TestInitCatastrophe(
-                        s"Failed to acquire resource for testName=${testOptions.name}. Reason:\n${e.toString}",
-                        testOptions,
-                        Option(e),
-                      ).raiseError[IO, (T, IO[Unit])]
-                  case Right(v) =>
-                    testLogger
-                      .info(MDCKeys.testSetup(testOptions, duration))("init: success")
-                      .as(v: (T, IO[Unit]))
-                }
+              allocated <- resource(testOptions).allocated.attempt.timedIn(MILLISECONDS).flatMap {
+                case (duration, att) =>
+                  att match {
+                    case Left(e)  =>
+                      testLogger
+                        .error(MDCKeys.testSetup(testOptions, TestOutcome.InitError, duration))("init: failed") >>
+                        TestInitCatastrophe(
+                          s"Failed to acquire resource for testName=${testOptions.name}. Reason:\n${e.toString}",
+                          testOptions,
+                          Option(e),
+                        ).raiseError[IO, (T, IO[Unit])]
+                    case Right(v) =>
+                      testLogger
+                        .info(MDCKeys.testSetup(testOptions, duration))("init: success")
+                        .as(v: (T, IO[Unit]))
+                  }
               }
               (resourceFixture, release) = allocated
               _         <- IO(promise.success(release))
