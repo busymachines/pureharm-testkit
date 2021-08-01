@@ -28,7 +28,7 @@ final class PureharmTestTest extends PureharmTest {
   }
 
   private val myResource =
-    ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Clock[IO].sleep(10.millis)))
+    ResourceFixture((to: TestOptions) => Resource.eval(testLogger.info(s"Making: $to") >> Timer[IO].sleep(10.millis)))
 
   myResource.test("with resource")((_: Unit) => testLogger.info("Executing test w/ resource"))
 
@@ -40,11 +40,11 @@ final class PureharmTestTest extends PureharmTest {
     423
   }
 
-  private val failedResource = {
+  val failedResource = {
     import busymachines.pureharm.anomaly.InvalidInputAnomaly
     ResourceFixture((_: TestOptions) =>
       Resource.eval(
-        Clock[IO].sleep(10.millis).flatMap(_ => InvalidInputAnomaly("failed resource").raiseError[IO, Unit])
+        Timer[IO].sleep(10.millis).flatMap(_ => InvalidInputAnomaly("failed resource").raiseError[IO, Unit])
       )
     )
   }

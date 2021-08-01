@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm.testkit.util
+package busymachines.pureharm
 
-import cats.effect.unsafe.IORuntime
-
-/** Overriding [[implicitIORuntime]] will get you the concurrency characteristics that you need. For the most part this
-  * should be OK
+/** @author
+  *   Lorand Szakacs, https://github.com/lorandszakacs
+  * @since 26
+  *   Jun 2020
   */
-trait PureharmTestRuntime extends PureharmTestPlatformSpecific {
-  implicit def implicitIORuntime: IORuntime = IORuntime.global
-}
-
-object PureharmTestRuntime extends PureharmTestRuntime
+package object testkit extends PureharmTestkitAliases

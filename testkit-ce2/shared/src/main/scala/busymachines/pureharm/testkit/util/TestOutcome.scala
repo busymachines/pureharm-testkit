@@ -16,13 +16,12 @@
 
 package busymachines.pureharm.testkit.util
 
-import cats.effect.unsafe.IORuntime
-
-/** Overriding [[implicitIORuntime]] will get you the concurrency characteristics that you need. For the most part this
-  * should be OK
-  */
-trait PureharmTestRuntime extends PureharmTestPlatformSpecific {
-  implicit def implicitIORuntime: IORuntime = IORuntime.global
+sealed trait TestOutcome extends Product with Serializable {
+  override def toString: String = this.productPrefix
 }
 
-object PureharmTestRuntime extends PureharmTestRuntime
+object TestOutcome {
+  case object Failed    extends TestOutcome
+  case object Succeeded extends TestOutcome
+  case object InitError extends TestOutcome
+}

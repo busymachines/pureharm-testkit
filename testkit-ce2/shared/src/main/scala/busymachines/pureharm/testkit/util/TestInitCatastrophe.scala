@@ -16,13 +16,18 @@
 
 package busymachines.pureharm.testkit.util
 
-import cats.effect.unsafe.IORuntime
+import busymachines.pureharm.anomaly._
+import munit.TestOptions
 
-/** Overriding [[implicitIORuntime]] will get you the concurrency characteristics that you need. For the most part this
-  * should be OK
-  */
-trait PureharmTestRuntime extends PureharmTestPlatformSpecific {
-  implicit def implicitIORuntime: IORuntime = IORuntime.global
+final case class TestInitCatastrophe(
+  override val message:  String,
+  options:               TestOptions,
+  override val causedBy: Option[Throwable] = Option.empty,
+) extends Catastrophe(message, causedBy) {
+
+  override def parameters: Anomaly.Parameters = super.parameters ++ Anomaly.Parameters(
+    "location" -> options.location.toString,
+    "tags"     -> options.tags.toSeq.map(_.toString()),
+    "testName" -> options.name,
+  )
 }
-
-object PureharmTestRuntime extends PureharmTestRuntime

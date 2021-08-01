@@ -73,8 +73,8 @@ ThisBuild / crossScalaVersions := List(Scala213, Scala3)
 
 //required for binary compat checks
 ThisBuild / versionIntroduced := Map(
-  Scala213  -> "0.1.0",
-  Scala3    -> "0.4.0",
+  Scala213 -> "0.1.0",
+  Scala3   -> "0.4.0",
 )
 
 //=============================================================================
@@ -87,7 +87,8 @@ ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 val pureharmCoreV        = "0.3.0"     //https://github.com/busymachines/pureharm-core/releases
 val pureharmEffectsV     = "0.5.0"     //https://github.com/busymachines/pureharm-effects-cats/releases
 val munitV               = "0.7.27"    //https://github.com/scalameta/munit/releases
-val log4catsV            = "1.3.1"     //https://github.com/typelevel/log4cats/releases
+val log4catsCE2V         = "1.3.1"     //https://github.com/typelevel/log4cats/releases
+val log4catsV            = "2.1.1"     //https://github.com/typelevel/log4cats/releases
 // format: on
 //=============================================================================
 //============================== Project details ==============================
@@ -98,9 +99,36 @@ lazy val root = project
   .aggregate(
     testkitJVM,
     testkitJS,
+    `testkit-ce2JVM`,
+    `testkit-ce2JS`,
   )
   .enablePlugins(NoPublishPlugin)
   .enablePlugins(SonatypeCiReleasePlugin)
+
+lazy val `testkit-ce2` = crossProject(JVMPlatform, JSPlatform)
+  .settings(commonSettings)
+  .settings(
+    name := "pureharm-testkit-ce2",
+    libraryDependencies ++= Seq(  
+      // format: off
+      "com.busymachines"    %%% "pureharm-core-anomaly"       % pureharmCoreV         withSources(),
+      "com.busymachines"    %%% "pureharm-core-sprout"        % pureharmCoreV         withSources(),
+      "com.busymachines"    %%% "pureharm-effects-cats-2"     % pureharmEffectsV      withSources(),
+      "org.typelevel"       %%% "log4cats-core"               % log4catsCE2V          withSources(),
+      "org.scalameta"       %%% "munit"                       % munitV                withSources(),
+      // format: on
+    ),
+  )
+
+lazy val `testkit-ce2JVM` = `testkit-ce2`.jvm.settings(
+  javaOptions ++= Seq("-source", "1.8", "-target", "1.8")
+)
+
+lazy val `testkit-ce2JS` = `testkit-ce2`
+  .jsSettings(
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  )
+  .js
 
 lazy val testkit = crossProject(JVMPlatform, JSPlatform)
   .settings(commonSettings)
@@ -108,11 +136,11 @@ lazy val testkit = crossProject(JVMPlatform, JSPlatform)
     name := "pureharm-testkit",
     libraryDependencies ++= Seq(  
       // format: off
-      "com.busymachines" %%% "pureharm-core-anomaly"   % pureharmCoreV      withSources(),
-      "com.busymachines" %%% "pureharm-core-sprout"    % pureharmCoreV      withSources(),
-      "com.busymachines" %%% "pureharm-effects-cats"   % pureharmEffectsV   withSources(),
-      "org.typelevel"    %%% "log4cats-core"           % log4catsV          withSources(),
-      "org.scalameta"    %%% "munit"                   % munitV             withSources(),
+      "com.busymachines"    %%% "pureharm-core-anomaly"       % pureharmCoreV         withSources(),
+      "com.busymachines"    %%% "pureharm-core-sprout"        % pureharmCoreV         withSources(),
+      "com.busymachines"    %%% "pureharm-effects-cats"       % pureharmEffectsV      withSources(),
+      "org.typelevel"       %%% "log4cats-core"               % log4catsV             withSources(),
+      "org.scalameta"       %%% "munit"                       % munitV                withSources(),
       // format: on
     ),
   )
@@ -133,6 +161,6 @@ lazy val testkitJS = testkit
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
-    "-Xsource:3"
+    //"-Xsource:3"
   )
 )

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package busymachines.pureharm.testkit.util
+package busymachines.pureharm.testkit
 
-import cats.effect.unsafe.IORuntime
+trait PureharmTestkitAliases {
+  val Ignore: munit.Tag = munit.Ignore
+  val Only:   munit.Tag = munit.Only
+  val Flaky:  munit.Tag = munit.Flaky
+  val Fail:   munit.Tag = munit.Fail
+  val Slow:   munit.Tag = munit.Slow
 
-/** Overriding [[implicitIORuntime]] will get you the concurrency characteristics that you need. For the most part this
-  * should be OK
-  */
-trait PureharmTestRuntime extends PureharmTestPlatformSpecific {
-  implicit def implicitIORuntime: IORuntime = IORuntime.global
+  type Location = munit.Location
+  val Location: munit.Location.type = munit.Location
+
+  type TestOptions = munit.TestOptions
+  val TestOptions: munit.TestOptions.type = munit.TestOptions
+
+  type TestLogger = types.TestLogger
+  val TestLogger: types.TestLogger.type = types.TestLogger
 }
-
-object PureharmTestRuntime extends PureharmTestRuntime
