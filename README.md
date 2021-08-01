@@ -4,28 +4,37 @@ See [changelog](./CHANGELOG.md).
 
 ## Scala versions
 
-- 2.13, JS + JVM
-- 3.0.0-RC1, JS + JVM
-- 3.0.0-RC2, JS + JVM
+- `2.13`, JS + JVM
+- `3.0.1`, JS + JVM
 
 ## modules
 
-- `"com.busymachines" %% s"pureharm-testkit" % "0.3.0"`. Which has these as its main dependencies:
+- `"com.busymachines" %% s"pureharm-testkit" % "0.4.0"` (for cats-effect 3). Which has these as its main dependencies:
   - [munit](https://github.com/scalameta/munit/releases) `0.7.23`
-  - [log4cats-core](https://github.com/typelevel/log4cats/releases) `1.2.2`
-  - [pureharm-core-anomaly](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
-  - [pureharm-core-sprout](https://github.com/busymachines/pureharm-core/releases) `0.2.0`
-  - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.4.0`
+  - [log4cats-core](https://github.com/typelevel/log4cats/releases) `1.3.1`
+  - [pureharm-core-anomaly](https://github.com/busymachines/pureharm-core/releases) `0.3.0`
+  - [pureharm-core-sprout](https://github.com/busymachines/pureharm-core/releases) `0.3.0`
+  - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.5.0`
+
+- `"com.busymachines" %% s"pureharm-testkit-ce2" % "0.4.0"` (for cats-effect 2). Which has these as its main dependencies:
+  - [munit](https://github.com/scalameta/munit/releases) `0.7.23`
+  - [log4cats-core](https://github.com/typelevel/log4cats/releases) `2.1.1`
+  - [pureharm-core-anomaly](https://github.com/busymachines/pureharm-core/releases) `0.3.0`
+  - [pureharm-core-sprout](https://github.com/busymachines/pureharm-core/releases) `0.3.0`
+  - [pureharm-effects-cats](https://github.com/busymachines/pureharm-effects-cats/releases) `0.5.0`
 
 ## usage
 
-Follow the [munit](https://scalameta.org/munit/docs/getting-started.html) setup to add the appropriate test framework to your build.
+### :warning: only for sbt version lower than `1.5.0`
+If you are on sbt versions lower than `1.5.0`, then follow the [munit](https://scalameta.org/munit/docs/getting-started.html) setup to add the appropriate test framework to your build.
 
 ```scala
 testFrameworks += new TestFramework("munit.Framework")
 ```
 
-Then, create your own "testkit" package. And use that everywhere.
+### for sbt versions greater or equal to `1.5.0`, and after the above setup
+
+Create your own "testkit" package. And use that everywhere.
 
 ```scala
 package myapp
